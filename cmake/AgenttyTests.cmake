@@ -26,7 +26,7 @@ set(_AGENTTY_CONSOLIDATED
     slash_menu_test
     effort_auto_test settings_multiproc_test
     wire_shared_test complexity_test copilot_token_test kimi_token_test
-    chatgpt_bundled_models_test settings_default_test
+    chatgpt_bundled_models_test metadata_throughput_test settings_default_test
     turn_provenance_test subagent_pin_test
     program_hooks_test login_cancel_test subs_key_test reducer_effects_test
     sim_turn_test view_purity_test
@@ -564,6 +564,10 @@ agentty_finalize_fold(
 # "this looks nice" asserts nothing. Build it explicitly:
 #   cmake --build build --target stats_visual && ./build/stats_visual
 agentty_test(stats_visual            MODE standalone NO_TEST)
+# Live /models catalog dump for a signed-in ChatGPT account (needs real
+# credentials; never runs in CI). Human compares its rows against the
+# codex-rs embedded catalog to audit the picker's context windows.
+agentty_test(codex_catalog_probe     MODE standalone NO_TEST)
 # NO_TEST too: it prints timings for a human. An assertion on microseconds
 # would be a flaky test of the machine it runs on, not of the code.
 agentty_test(stats_refresh_bench     MODE standalone NO_TEST)

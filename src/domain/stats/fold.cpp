@@ -190,6 +190,17 @@ void Facts::fold(const Message& msg) {
         push_capped(stream.rate_series,
                     static_cast<double>(t.output_tokens)
                       / (static_cast<double>(t.stream_ms) / 1000.0));
+    // Same denominator, visible tokens only. `output_tokens` is the BILLED
+    // figure and includes reasoning on every provider that reports it
+    // separately, so a thinking turn's raw rate overstates what the user
+    // watched appear by exactly the reasoning share. Guarded on reasoning
+    // < output: a provider that double-counts (reasoning outside output)
+    // must not produce a negative rate.
+    if (t.stream_ms && t.reasoning_tokens
+        && t.reasoning_tokens < t.output_tokens)
+        push_capped(stream.visible_rate_series,
+                    static_cast<double>(t.output_tokens - t.reasoning_tokens)
+                      / (static_cast<double>(t.stream_ms) / 1000.0));
 }
 
 void Facts::merge(const Facts& o) {
@@ -249,6 +260,8 @@ void Facts::merge(const Facts& o) {
     stream.bytes.merge(o.stream.bytes);
     for (double x : o.stream.ttft_series) push_capped(stream.ttft_series, x);
     for (double x : o.stream.rate_series) push_capped(stream.rate_series, x);
+    for (double x : o.stream.visible_rate_series)
+        push_capped(stream.visible_rate_series, x);
 
     context.compactions += o.context.compactions;
     if (o.context.peak_input > context.peak_input)

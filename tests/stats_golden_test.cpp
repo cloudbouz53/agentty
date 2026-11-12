@@ -446,7 +446,11 @@ TEST_CASE("stats_golden: every tab renders byte-identically") {
     // width pressure like every other panel. Only the footer line changed;
     // the clip scan, the overrun check and every feature assertion stayed
     // green across the sweep.
-    const std::uint64_t kGoldenHash = 0x024089ffde43e434ull;
+    // Moved 2026-11 (again): the stream tab's single "Output rate" split
+    // into "Generated rate" (billed output, incl. reasoning) + "Visible
+    // rate" (output − reasoning), with the incl-reasoning note in the
+    // detail. See metadata_throughput_test for the accounting behind it.
+    const std::uint64_t kGoldenHash = 0x815fad5537bf222full;
     const std::uint64_t got = fnv1a(out);
 
     if (kGoldenHash == 0) {

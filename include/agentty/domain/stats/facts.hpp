@@ -309,7 +309,13 @@ struct Facts {
         // fast on average"; a sparkline answers "is it getting worse",
         // which is the question someone opens this tab with.
         std::vector<double> ttft_series;
-        std::vector<double> rate_series;    // output tokens per second
+        std::vector<double> rate_series;    // total generated tokens per second (incl. reasoning)
+        // Visible output only: (output − reasoning) per second of generation
+        // time. On thinking models the billed output is dominated by
+        // reasoning tokens the user never sees, so the two series can
+        // legitimately differ by several ×; showing one number labelled
+        // "output" conflates them. Empty for turns without reasoning.
+        std::vector<double> visible_rate_series;
     } stream;
 
     struct ContextF {

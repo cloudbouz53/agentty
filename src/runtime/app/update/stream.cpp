@@ -545,6 +545,25 @@ Cmd finalize_turn(Model& m, StopReason stop_reason) {
                 t.wire_bytes = a->live_delta_bytes > 0xFFFFFFFFull
                                  ? 0xFFFFFFFFu
                                  : static_cast<std::uint32_t>(a->live_delta_bytes);
+                // Correct the sparkline's frozen tail with the AUTHORITATIVE
+                // rate. The live samples were the streamed-bytes÷4 estimate
+                // (the usage frame only arrives at stream end, so mid-stream
+                // there is nothing else to sample); once stream_ms and the
+                // billed output are both known, the last sample becomes real
+                // tokens over real generation time — the number that stays
+                // on screen after the stream stops. A zero-duration stream
+                // (interrupted before any interval sample) keeps the
+                // estimate rather than dividing by nothing.
+                if (t.stream_ms && t.output_tokens
+                    && (m.s.rate_history_full || m.s.rate_history_pos > 0)) {
+                    const float authoritative =
+                        static_cast<float>(t.output_tokens)
+                          / (static_cast<float>(t.stream_ms) / 1000.0f);
+                    const std::size_t last_idx =
+                        (m.s.rate_history_pos + StreamState::kRateSamples - 1)
+                            % StreamState::kRateSamples;
+                    m.s.rate_history[last_idx] = authoritative;
+                }
             }
         }
         // Drain any text still in the smoothing buffer before committing

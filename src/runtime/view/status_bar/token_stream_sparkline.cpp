@@ -44,6 +44,12 @@ maya::TokenStreamSparkline::Config token_stream_sparkline_config(const Model& m)
         ? std::chrono::duration_cast<std::chrono::milliseconds>(
               now - a->first_delta_at).count()
         : 0;
+    // ÷4 is the usual ASCII tokens-per-byte heuristic, so this TOTAL and
+    // every rate sample in the ring are ESTIMATES — the authoritative usage
+    // frame only lands at stream end, and finalize_turn then rewrites the
+    // ring's last sample with real tokens over real generation time. The
+    // stats panel's rates are usage-derived from the start; this chip is
+    // the live view, and mid-stream an estimate is all that exists.
     double approx_tok = a ? static_cast<double>(a->live_delta_bytes) / 4.0 : 0.0;
 
     // Pick the displayed rate: live during streaming (after a 250 ms
