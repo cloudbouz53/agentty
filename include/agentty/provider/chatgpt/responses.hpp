@@ -26,7 +26,12 @@ namespace agentty::provider::chatgpt {
 struct CatalogModel {
     std::string slug;             // wire id sent as body.model
     std::string display_name;     // human label for the picker
-    int         context_window = 272000;
+    // 0 = the server did not report a window for this slug. The default was
+    // once 272'000 — that fabricated precision for every model whose row
+    // omitted (or mis-typed) the field, and the picker printed "272k" as if
+    // the endpoint had said so. 0 flows into ModelInfo and the picker shows
+    // "auto"; the compaction ladder falls back to its conservative default.
+    int         context_window = 0;
     bool        is_default      = false;
     int         priority        = 0;
 };

@@ -44,7 +44,7 @@ TEST_CASE("chatgpt catalog parsing filters and orders models") {
     CHECK(models[0].slug == "first");
     CHECK(models[0].is_default);
     CHECK(models[1].slug == "fallback");
-    CHECK(models[1].context_window == 272000);
+    CHECK(models[1].context_window == 0);   // absent/invalid on the wire → unknown, never a fabricated 272k
     CHECK(models[2].slug == "other");
     CHECK(models[3].slug == "later");
     CHECK(models[3].context_window == 12345);
@@ -69,7 +69,7 @@ TEST_CASE("chatgpt catalog prioritizes valid priorities before missing or invali
     CHECK(models[2].slug == "last-valid");
     CHECK(models[3].slug == "missing");
     CHECK(models[4].slug == "unsigned-overflow");
-    CHECK(models[4].context_window == 272000);
+    CHECK(models[4].context_window == 0);   // u64-overflow on the wire → unknown, never a fabricated 272k
     CHECK(models[5].slug == "invalid");
     CHECK(models[6].slug == "out-of-range");
 }

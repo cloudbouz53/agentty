@@ -547,11 +547,24 @@ void stream_rates(const Facts& f, std::vector<Metric>& out) {
         double sum = 0;
         for (double v : f.stream.rate_series) sum += v;
         out.push_back(Metric{
-            .label  = "Output rate",
+            .label  = "Generated rate",
             .unit   = Unit::Rate,
             .value  = sum / static_cast<double>(f.stream.rate_series.size()),
-            .detail = "tok/s",
+            // `output_tokens` is the billed figure and INCLUDES reasoning
+            // tokens, so say so — on a thinking turn this number is mostly
+            // tokens nobody watched appear.
+            .detail = "tok/s incl. reasoning",
             .series = f.stream.rate_series});
+    }
+    if (!f.stream.visible_rate_series.empty()) {
+        double sum = 0;
+        for (double v : f.stream.visible_rate_series) sum += v;
+        out.push_back(Metric{
+            .label  = "Visible rate",
+            .unit   = Unit::Rate,
+            .value  = sum / static_cast<double>(f.stream.visible_rate_series.size()),
+            .detail = "tok/s",
+            .series = f.stream.visible_rate_series});
     }
 }
 
